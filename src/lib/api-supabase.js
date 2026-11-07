@@ -12,7 +12,14 @@ export async function signIn(username, password) {
   const { error } = await sb.auth.signInWithPassword({ email: usernameToEmail(username), password });
   if (error) throw new Error("bad_login");
 }
-export const signOut = () => sb.auth.signOut();
+export async function signOut() {
+  try { await sb.auth.signOut({ scope: "local" }); } catch { /* clear below regardless */ }
+  try {
+    Object.keys(localStorage).filter((k) => k.startsWith("sb-") && k.includes("auth-token"))
+      .forEach((k) => localStorage.removeItem(k));
+  } catch { /* storage unavailable */ }
+  window.location.replace(import.meta.env.BASE_URL);
+}
 export async function getMe() {
   const id = await uid();
   if (!id) return null;
