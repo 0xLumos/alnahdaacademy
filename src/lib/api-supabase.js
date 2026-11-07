@@ -19,7 +19,8 @@ export async function getMe() {
   return unwrap(await sb.from("profiles").select("*").eq("id", id).maybeSingle());
 }
 export function onAuthChange(cb) {
-     const { data } = sb.auth.onAuthStateChange(() => { setTimeout(cb, 0); });  return () => data.subscription.unsubscribe();
+  const { data } = sb.auth.onAuthStateChange(() => cb());
+  return () => data.subscription.unsubscribe();
 }
 
 // ---------- admin account management (edge function) ----------
