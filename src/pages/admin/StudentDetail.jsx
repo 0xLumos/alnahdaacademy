@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import * as api from "@api";
 import { confirmAction } from "../../lib/config";
 import { useLoad } from "../../lib/auth";
@@ -153,6 +153,7 @@ function ProfileCard({ p, cats, onSaved }) {
 
 function AccountCard({ p, act }) {
   const [newPw, setNewPw] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   return (
     <section className="panel">
       <h2>الحساب</h2>
@@ -164,7 +165,9 @@ function AccountCard({ p, act }) {
               if (confirmAction(`إيقاف حساب ${p.full_name}؟ لن يتمكن من الدخول حتى تعيد تفعيله.`)) act(() => api.setActive(p.id, false), "تم إيقاف الحساب.")();
             }}>إيقاف الحساب</button>
           : <button className="btn btn-red" onClick={act(() => api.setActive(p.id, true), "تم تفعيل الحساب.")}>تفعيل الحساب</button>}
+        <button className="btn btn-ghost btn-danger" onClick={() => setDeleting(true)}>حذف الطالب</button>
       </div>
+      {deleting && <DeleteStudent p={p} onClose={() => setDeleting(false)} />}
       {newPw !== null && (
         <Modal title="كلمة مرور جديدة" onClose={() => setNewPw(null)}>
           <form className="form" onSubmit={async (e) => {
@@ -183,6 +186,38 @@ function AccountCard({ p, act }) {
         </Modal>
       )}
     </section>
+  );
+}
+
+// Permanent delete, confirmed by typing the student's username so it cannot happen by a stray tap.
+function DeleteStudent({ p, onClose }) {
+  const nav = useNavigate();
+  const [typed, setTyped] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function submit(e) {
+    e.preventDefault();
+    setBusy(true);
+    try { await api.deleteStudent(p.id); nav("/admin/students", { replace: true }); }
+    catch (e2) { setErr(errText(e2)); setBusy(false); }
+  }
+  return (
+    <Modal title={`حذف ${p.full_name}`} onClose={onClose}>
+      <form className="form" onSubmit={submit}>
+        <p>سيُحذف الحساب نهائياً مع الاشتراكات والحصص والمحادثة، ولا يمكن التراجع.</p>
+        <p className="muted">المدفوعات السابقة تبقى في المالية باسم الطالب. إذا كان الطالب سيعود لاحقاً، استخدم "إيقاف الحساب" بدلاً من الحذف.</p>
+        <Field label={`للتأكيد اكتب اسم المستخدم: ${p.username}`}>
+          <input dir="ltr" autoCapitalize="none" spellCheck="false" value={typed} onChange={(e) => setTyped(e.target.value)} />
+        </Field>
+        {err && <div className="note note-error" role="alert">{err}</div>}
+        <div className="row-end">
+          <button type="button" className="btn btn-ghost" onClick={onClose}>إلغاء</button>
+          <button className="btn btn-red" disabled={busy || typed.trim().toLowerCase() !== p.username}>
+            {busy ? "جارٍ الحذف…" : "حذف الطالب نهائياً"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
