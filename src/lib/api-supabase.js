@@ -19,17 +19,27 @@ export async function getMe() {
   return unwrap(await sb.from("profiles").select("*").eq("id", id).maybeSingle());
 }
 export function onAuthChange(cb) {
-  const { data } = sb.auth.onAuthStateChange(() => cb());
+  // Supabase holds an auth lock while this callback runs. Calling Supabase inside it
+  // (as cb does via getMe) deadlocks, so defer the work until the callback has returned.
+  const { data } = sb.auth.onAuthStateChange(() => { setTimeout(cb, 0); });
   return () => data.subscription.unsubscribe();
 }
 
 // ---------- admin account management (edge function) ----------
 async function adminFn(payload) {
+  // Refresh first if the token is close to expiry, so a stale token never reaches the function.
+  await sb.auth.getSession();
   const { data, error } = await sb.functions.invoke("admin-users", { body: payload });
   if (error) {
-    let code = error.message;
-    try { code = (await error.context.json()).error ?? code; } catch { /* keep message */ }
-    throw new Error(code);
+    let code = error.message, detail;
+    try {
+      const body = await error.context.json();
+      code = body.error ?? body.message ?? code; // our function sends {error}, the gateway sends {message}
+      detail = body.detail;
+    } catch { /* keep message */ }
+    const err = new Error(code);
+    err.detail = detail;
+    throw err;
   }
   return data;
 }
