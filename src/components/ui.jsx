@@ -27,13 +27,20 @@ export const Badge = ({ n }) => (n > 0 ? <span className="badge" aria-label={`${
 
 export function Modal({ title, onClose, children }) {
   const ref = useRef(null);
+  // Keep the latest onClose without re-running the effect: parents pass a new function on
+  // every render, and re-running would steal focus from the field being typed in.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
     const prev = document.activeElement;
-    ref.current?.querySelector("input, select, textarea, button")?.focus();
-    const onKey = (e) => e.key === "Escape" && onClose();
+    // Focus the first form field; fall back to a button only if the dialog has no fields.
+    const first = ref.current?.querySelector("input, select, textarea")
+      ?? ref.current?.querySelector("button");
+    first?.focus();
+    const onKey = (e) => e.key === "Escape" && closeRef.current();
     document.addEventListener("keydown", onKey);
     return () => { document.removeEventListener("keydown", onKey); prev?.focus?.(); };
-  }, [onClose]);
+  }, []);
   return (
     <div className="modal-back" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={title} ref={ref}>

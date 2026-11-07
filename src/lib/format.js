@@ -74,5 +74,10 @@ export const ERRORS = {
   cannot_deactivate_self: "لا يمكنك إيقاف حسابك.",
   forbidden: "هذه العملية للمدير فقط.",
   unauthorized: "انتهت الجلسة. سجّل الدخول من جديد.",
+  server_misconfigured: "إعدادات الخادم غير مكتملة. تواصل مع المسؤول التقني.",
 };
-export const errText = (e) => ERRORS[e?.message] ?? e?.message ?? "حدث خطأ غير متوقع.";
+// Known codes get an Arabic sentence; the technical detail (if any) is appended so problems can be diagnosed.
+export const errText = (e) => {
+  const base = ERRORS[e?.message] ?? e?.message ?? "حدث خطأ غير متوقع.";
+  return e?.detail ? `${base} (${e.detail})` : base;
+};
