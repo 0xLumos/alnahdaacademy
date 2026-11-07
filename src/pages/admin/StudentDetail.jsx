@@ -165,7 +165,7 @@ function AccountCard({ p, act }) {
             }}>إيقاف الحساب</button>
           : <button className="btn btn-red" onClick={act(() => api.setActive(p.id, true), "تم تفعيل الحساب.")}>تفعيل الحساب</button>}
       </div>
-      {newPw && (
+      {newPw !== null && (
         <Modal title="كلمة مرور جديدة" onClose={() => setNewPw(null)}>
           <form className="form" onSubmit={async (e) => {
             e.preventDefault();
