@@ -1,0 +1,64 @@
+# Builds the site and publishes it to GitHub Pages on every push to main.
+# Without Supabase secrets it publishes the demo (sample data). After you add the secrets
+# VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (repo Settings > Secrets and variables > Actions),
+# the next run publishes the real site.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm ci
+      - name: Build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+        run: |
+          if [ -n "$VITE_SUPABASE_URL" ] && [ -n "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "Building the real site (Supabase secrets found)"
+            npm run build
+            OUT=dist
+          else
+            echo "No Supabase secrets: building the demo with sample data"
+            npm run build:demo
+            OUT=dist-demo
+          fi
+          # Pages has no rewrite rules: serve index.html for unknown paths so refreshes on /portal/... work.
+          cp "$OUT/index.html" "$OUT/404.html"
+          touch "$OUT/.nojekyll"
+          echo "OUT=$OUT" >> "$GITHUB_ENV"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.OUT }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
