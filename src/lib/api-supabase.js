@@ -12,6 +12,9 @@ export async function signIn(username, password) {
   const { error } = await sb.auth.signInWithPassword({ email: usernameToEmail(username), password });
   if (error) throw new Error("bad_login");
 }
+// Logs out this device only ("local"); the default "global" would log out every device on the account.
+// If the server already ended the session (e.g. it was revoked elsewhere), the logout call fails with 403,
+// so the saved login is also removed here directly and the page reloads. Logging out can never get stuck.
 export async function signOut() {
   try { await sb.auth.signOut({ scope: "local" }); } catch { /* clear below regardless */ }
   try {

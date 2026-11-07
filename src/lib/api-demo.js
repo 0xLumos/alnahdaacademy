@@ -97,6 +97,16 @@ export async function createUser({ username, password, full_name, phone, role, c
   return wait({ id: p.id });
 }
 export async function resetPassword(_id, pw) { need(isAdmin()); need(pw.length >= 8, "weak_password"); return wait({ ok: true }); }
+export async function deleteStudent(uid) {
+  need(isAdmin()); need(uid !== me.id, "cannot_delete_self");
+  const p = db.profiles.find((x) => x.id === uid); need(p, "not_found"); need(p.role === "student", "only_students");
+  db.payments.forEach((x) => { if (x.student_id === uid) { x.payer_name = x.payer_name ?? p.full_name; x.student_id = null; } });
+  db.profiles = db.profiles.filter((x) => x.id !== uid);
+  db.subscriptions = db.subscriptions.filter((x) => x.student_id !== uid);
+  db.enrollments = db.enrollments.filter((x) => x.student_id !== uid);
+  db.chat = db.chat.filter((x) => x.student_id !== uid);
+  return wait({ ok: true });
+}
 export async function setActive(uid, active) {
   need(isAdmin()); need(uid !== me.id, "cannot_deactivate_self");
   db.profiles.find((p) => p.id === uid).active = active; return wait({ ok: true });
