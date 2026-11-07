@@ -56,6 +56,7 @@ async function adminFn(payload) {
 export const createUser = (p) => adminFn({ action: "create", ...p });
 export const resetPassword = (user_id, password) => adminFn({ action: "reset_password", user_id, password });
 export const setActive = (user_id, active) => adminFn({ action: "set_active", user_id, active });
+export const deleteStudent = (user_id) => adminFn({ action: "delete", user_id });
 
 // ---------- profiles ----------
 export const listStudents = async () =>
