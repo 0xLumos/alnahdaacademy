@@ -220,3 +220,12 @@ export async function deletePayment(pid) { need(isAdmin()); db.payments = db.pay
 export async function listExpenses(from, to) { need(isAdmin()); return wait(db.expenses.filter((e) => inRange(e.spent_on, from, to)).sort(desc("spent_on"))); }
 export async function addExpense(e) { need(isAdmin()); need(Number(e.amount) > 0, "invalid_amount"); db.expenses.push({ ...e, id: id(), amount: Number(e.amount), created_at: now() }); return wait(null); }
 export async function deleteExpense(eid) { need(isAdmin()); db.expenses = db.expenses.filter((e) => e.id !== eid); return wait(null); }
+
+export async function exportAll() {
+  need(isAdmin());
+  return wait({
+    profiles: db.profiles, categories: db.categories, classes: db.classes, enrollments: db.enrollments,
+    subscriptions: db.subscriptions, payments: db.payments, expenses: db.expenses, products: db.products,
+    announcements: db.announcements, chat_messages: db.chat,
+  });
+}

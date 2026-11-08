@@ -67,7 +67,7 @@ export function AdminShell() {
   const links = [
     ["/admin", "لوحة التحكم"], ["/admin/students", "الطلاب"], ["/admin/classes", "الحصص"],
     ["/admin/news", "الإعلانات"], ["/admin/inbox", "المحادثات"],
-    ["/admin/finance", "المالية"], ["/admin/shop", "المتجر"],
+    ["/admin/finance", "المالية"], ["/admin/shop", "المتجر"], ["/admin/backup", "النسخ الاحتياطي"],
   ];
   return (
     <div className="shell shell-admin">

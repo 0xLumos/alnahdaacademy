@@ -177,3 +177,22 @@ export const listExpenses = async (from, to) =>
 export const addExpense = async (e) => unwrap(await sb.from("expenses").insert({
   category: e.category, amount: Number(e.amount), spent_on: e.spent_on, note: e.note || null, created_by: await uid() }));
 export const deleteExpense = async (id) => unwrap(await sb.from("expenses").delete().eq("id", id));
+
+// ---------- backup (admin only; RLS returns everything to an admin) ----------
+const BACKUP_TABLES = ["profiles", "categories", "classes", "enrollments", "subscriptions",
+  "payments", "expenses", "products", "announcements", "chat_messages"];
+
+// Supabase returns at most 1000 rows per request, so read each table page by page.
+async function fetchAll(table) {
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const page = unwrap(await sb.from(table).select("*").range(from, from + 999));
+    rows.push(...page);
+    if (page.length < 1000) return rows;
+  }
+}
+export async function exportAll() {
+  const out = {};
+  for (const t of BACKUP_TABLES) out[t] = await fetchAll(t);
+  return out;
+}

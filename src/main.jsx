@@ -10,6 +10,7 @@ import Landing from "./pages/Landing";
 import Shop, { PortalShop } from "./pages/Shop";
 import Finance from "./pages/admin/Finance";
 import Products from "./pages/admin/Products";
+import Backup from "./pages/admin/Backup";
 import Home from "./pages/student/Home";
 import Schedule from "./pages/student/Schedule";
 import News from "./pages/student/News";
@@ -65,6 +66,7 @@ function Portal() {
         <Route path="news" element={<AdminNews />} />
         <Route path="finance" element={<Finance />} />
         <Route path="shop" element={<Products />} />
+        <Route path="backup" element={<Backup />} />
         <Route path="inbox" element={<Inbox />} />
         <Route path="inbox/:id" element={<Thread />} />
       </Route>

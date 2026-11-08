@@ -18,12 +18,11 @@ export const SITE = {
   address: "مقابل روضة النهضة الإسلامية، الرام",
   // Paste the "Share" link from Google Maps here. Leave empty to hide the directions button.
   mapUrl: "",
-  phones: ["0525514416", "0569300152"],
+  phones: ["0525514416", "+970569300152"],
   // Digits only with country code, e.g. 9627XXXXXXXX. Leave empty to hide.
   whatsapp: "",
-  // Full profile links. Leave empty to hide.
-  instagram: "https://www.instagram.com/al_nahdasportsacademy/",
-  tiktok: "https://www.tiktok.com/@al_nahdasportsaca",
+  // Full profile link. Leave empty to hide.
+  instagram: "",
 };
 
 export const isPlaceholder = (s) => typeof s === "string" && s.trim().startsWith("[");
