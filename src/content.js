@@ -22,7 +22,8 @@ export const SITE = {
   // Digits only with country code, e.g. 9627XXXXXXXX. Leave empty to hide.
   whatsapp: "",
   // Full profile link. Leave empty to hide.
-  instagram: "",
+  instagram: "https://www.instagram.com/al_nahdasportsacademy/",
+  tiktok: "https://www.tiktok.com/@al_nahdasportsaca",
 };
 
 export const isPlaceholder = (s) => typeof s === "string" && s.trim().startsWith("[");
